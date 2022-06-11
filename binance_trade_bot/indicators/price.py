@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from binance.client import Client
 
 from binance_trade_bot.indicators import Indicator
-from binance_trade_bot.utils import ohlcv_to_dictionary
+from binance_trade_bot.utils import ohlcv_to_dictionary, timeframe_to_timedelta, date_to_string
 import plotly.graph_objects as go
 
 from binance_trade_bot.utils import group_by_key
@@ -22,36 +22,23 @@ class Price(Indicator):
 
     def get_history(self):
         start_date = self.date_time - timedelta(minutes=1000)  # todo change minutes to timeframe
-        start_date = self.date_to_string(start_date)
+        start_date = date_to_string(start_date)
         end_date = self.date_time
-        end_date = self.date_to_string(end_date)
+        end_date = date_to_string(end_date)
         if self.logger is not None:
             self.logger.info(
                 f"[Price Indicator]Fetching prices for {self.symbol} between {end_date} and {self.date_time}")
         for result in self.binance_client.get_historical_klines(
                 self.symbol, self.timeframe, start_date, end_date, limit=1000
         ):
-            date = self.date_to_string(datetime.utcfromtimestamp(result[0] / 1000))
+            date = date_to_string(datetime.fromtimestamp(result[0] / 1000))
             self.cache[f"{self.symbol} - {date}"] = ohlcv_to_dictionary(result)
         self.cache.commit()
 
     def get_bar(self, bar):
-        date = self.date_time - bar * self.timeframe_to_timedelta()
-        date_string = self.date_to_string(date)
+        date = self.date_time - bar * timeframe_to_timedelta(self.timeframe)
+        date_string = date_to_string(date)
         return self.cache.get(f"{self.symbol} - {date_string}", None)
-
-    def timeframe_to_timedelta(self):
-        minutes = 0
-        if 'm' in self.timeframe:
-            minutes = int(self.timeframe.replace('m', ''))
-        if 'h' in self.timeframe:
-            minutes = int(self.timeframe.replace('h', '')) * 60
-        if 'd' in self.timeframe:
-            minutes = int(self.timeframe.replace('d', '')) * 60 * 24
-        if 'w' in self.timeframe:
-            minutes = int(self.timeframe.replace('w', '')) * 60 * 24 * 7
-
-        return timedelta(minutes=minutes)
 
     def draw(self, to_bar=10, from_bar=0, silent=False):
         super().draw()

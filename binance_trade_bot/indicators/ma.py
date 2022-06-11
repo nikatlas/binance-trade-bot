@@ -18,14 +18,14 @@ class MA(Indicator):
         rough_bars = [self.ticker.get_bar(bar_number + diff) for diff in range(self.depth)]
         bars = [b for b in rough_bars if b]
 
-        if not bars or not bars[0]:
+        if not bars or not bars[0] or len(bars) < self.depth:
             return None
 
         keys = list(bars[0].keys())
         keys.remove('timestamp')
 
         result = {
-            key: (sum([bar[key] for bar in bars]) / self.depth) for key in keys
+            key: (sum([bar[key] for bar in bars]) / len(bars)) for key in keys
         }
         return {
             **result,
