@@ -4,14 +4,16 @@ from binance.client import Client
 
 from binance_trade_bot.indicators import Indicator
 from binance_trade_bot.utils import ohlcv_to_dictionary
+import plotly.graph_objects as go
+
+from binance_trade_bot.utils import group_by_key
 
 
 class Price(Indicator):
     def __init__(self, symbol, config, logger, timeframe="1m",
                  date_time=datetime.strptime('May 1 2022  01:00PM', '%b %d %Y %I:%M%p')):
-        super().__init__(symbol, ticker=self, timeframe=timeframe, date_time=date_time, name="price")
+        super().__init__(symbol, ticker=self, timeframe=timeframe, date_time=date_time, name="price", config=config, logger=logger)
 
-        self.logger = logger
         self.binance_client = Client(
             config.BINANCE_API_KEY,
             config.BINANCE_API_SECRET_KEY,
@@ -50,3 +52,17 @@ class Price(Indicator):
             minutes = int(self.timeframe.replace('w', '')) * 60 * 24 * 7
 
         return timedelta(minutes=minutes)
+
+    def draw(self, to_bar=10, from_bar=0, silent=False):
+        super().draw()
+
+        datapoints = [self.get_bar(i) for i in range(to_bar, from_bar, -1)]
+        data_dictionary = group_by_key(datapoints)
+
+        self.figure.add_trace(go.Candlestick(x=data_dictionary['timestamp'],
+                                             open=data_dictionary['open'],
+                                             high=data_dictionary['high'],
+                                             low=data_dictionary['low'],
+                                             close=data_dictionary['close']))
+        if not silent:
+            self.figure.show()
