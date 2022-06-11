@@ -14,3 +14,4 @@ unicorn-binance-websocket-api==1.34.2
 unicorn-fy==0.11.0
 itsdangerous==2.0.1
 matplotlib==3.5.2
+plotly==5.8.2

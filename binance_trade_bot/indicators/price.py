@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 from binance.client import Client
 
 from binance_trade_bot.indicators import Indicator
+from binance_trade_bot.utils import ohlcv_to_dictionary
 
 
 class Price(Indicator):
@@ -29,8 +30,7 @@ class Price(Indicator):
                 self.symbol, self.timeframe, start_date, end_date, limit=1000
         ):
             date = self.date_to_string(datetime.utcfromtimestamp(result[0] / 1000))
-            price = float(result[1])
-            self.cache[f"{self.symbol} - {date}"] = price
+            self.cache[f"{self.symbol} - {date}"] = ohlcv_to_dictionary(result)
         self.cache.commit()
 
     def get_bar(self, bar):
