@@ -16,7 +16,9 @@ class Indicator:
         self.config = config
         self.logger = logger
         self.timeframe = timeframe
-        self.date_time = trim_date_to_timeframe(date_time or datetime.now(), self.timeframe)
+        self.date_time = trim_date_to_timeframe(
+            date_time or datetime.now(), self.timeframe
+        )
         self.figure = None
 
     def get_bar(self, bar_number: int):
