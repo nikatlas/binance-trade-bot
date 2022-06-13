@@ -44,7 +44,7 @@ def timeframe_to_timedelta(timeframe):
 def trim_date_to_timeframe(dt, timeframe):
     time_dt = timeframe_to_timedelta(timeframe)
 
-    return dt + (datetime.min - dt) % time_dt
+    return dt + (datetime.min - dt) % time_dt - time_dt
 
 
 def date_to_string(date):

@@ -15,12 +15,12 @@ from binance_trade_bot.utils import group_by_key
 
 class Price(Indicator):
     def __init__(
-        self,
-        symbol,
-        config,
-        logger,
-        timeframe="1m",
-        date_time=datetime.strptime("May 1 2022  01:00PM", "%b %d %Y %I:%M%p"),
+            self,
+            symbol,
+            config,
+            logger,
+            timeframe="1m",
+            date_time=datetime.strptime("May 1 2022  01:00PM", "%b %d %Y %I:%M%p"),
     ):
         super().__init__(
             symbol,
@@ -38,10 +38,8 @@ class Price(Indicator):
             tld=config.BINANCE_TLD,
         )
 
-    def get_history(self):
-        start_date = self.date_time - timedelta(
-            minutes=1000
-        )  # todo change minutes to timeframe
+    def get_history(self, count):
+        start_date = self.date_time - (count+10) * timeframe_to_timedelta(self.timeframe)
         start_date = date_to_string(start_date)
         end_date = self.date_time
         end_date = date_to_string(end_date)
@@ -56,10 +54,8 @@ class Price(Indicator):
             self.cache[f"{self.symbol} - {date}"] = ohlcv_to_dictionary(result)
         self.cache.commit()
 
-    def get_bar(self, bar):
-        date = self.date_time - bar * timeframe_to_timedelta(self.timeframe)
-        date_string = date_to_string(date)
-        return self.cache.get(f"{self.symbol} - {date_string}", None)
+    def bar(self, bar):
+        raise KeyError("Value has not been fetched!", self.get_bar_cache_key(bar))
 
     def draw(self, to_bar=10, from_bar=0, silent=False):
         super().draw()

@@ -30,7 +30,7 @@ class MA(Indicator):
         )
         self.depth = depth
 
-    def get_bar(self, bar_number: int):
+    def bar(self, bar_number: int):
         rough_bars = [
             self.ticker.get_bar(bar_number + diff) for diff in range(self.depth)
         ]
